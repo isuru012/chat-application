@@ -17,7 +17,7 @@ public class Client1Controller {
 
     @FXML
     void btnSend(ActionEvent event) {
-
+int run=0;
     }
 
     @FXML
