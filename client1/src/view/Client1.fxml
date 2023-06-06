@@ -16,32 +16,32 @@
 
 <AnchorPane prefHeight="800.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Client1Controller">
    <children>
-      <JFXTextArea fx:id="txtArea" layoutX="14.0" layoutY="736.0" onKeyReleased="#onActionKeyReleasedTxtArea" opacity="0.0" prefHeight="44.0" prefWidth="760.0">
+      <JFXTextArea fx:id="txtArea" layoutX="14.0" layoutY="736.0" onKeyReleased="#onActionKeyReleasedTxtArea" prefHeight="44.0" prefWidth="760.0" visible="false">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </JFXTextArea>
-      <JFXButton buttonType="RAISED" layoutX="933.0" layoutY="741.0" onAction="#btnSend" opacity="0.0" prefHeight="37.0" prefWidth="69.0" style="-fx-background-color: #BFF5DC;" text="Send">
+      <JFXButton buttonType="RAISED" layoutX="933.0" layoutY="741.0" onAction="#btnSend" prefHeight="37.0" prefWidth="69.0" style="-fx-background-color: #BFF5DC;" text="Send" visible="false">
          <font>
             <Font name="Arial Bold" size="14.0" />
          </font>
       </JFXButton>
-      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="857.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" opacity="0.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="857.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" pickOnBounds="true" preserveRatio="true" visible="false">
          <image>
             <Image url="@../assets/attach.png" />
          </image>
       </ImageView>
-      <Label layoutX="14.0" layoutY="12.0" opacity="0.0" prefHeight="29.0" prefWidth="104.0" text="Client1">
+      <Label layoutX="14.0" layoutY="12.0" prefHeight="29.0" prefWidth="104.0" text="Client1" visible="false">
          <font>
             <Font name="Arial Bold" size="21.0" />
          </font>
       </Label>
-      <ScrollPane layoutX="14.0" layoutY="52.0" opacity="0.0" prefHeight="672.0" prefWidth="996.0">
+      <ScrollPane layoutX="14.0" layoutY="52.0" prefHeight="672.0" prefWidth="996.0" visible="false">
          <content>
             <VBox prefHeight="670.0" prefWidth="990.0" />
          </content>
       </ScrollPane>
-      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="804.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" opacity="0.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="804.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" pickOnBounds="true" preserveRatio="true" visible="false">
          <image>
             <Image url="@../assets/emojii.png" />
          </image>
