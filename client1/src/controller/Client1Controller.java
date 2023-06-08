@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -16,8 +17,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -103,18 +107,37 @@ public class Client1Controller extends Application{
             dataOutputStream.writeUTF(name);
             dataOutputStream.flush();
 
-
-
             while (true){
                 String msg = txtArea.getText();
 
                 if (msg.equalsIgnoreCase("CLOSE")){
                     break;
                 }
-
                 dataOutputStream.writeUTF(msg);
                 dataOutputStream.flush();
-                System.out.println(dataInputStream.readUTF());
+                HBox hBox=new HBox();
+                hBox.setAlignment(Pos.CENTER_RIGHT);
+
+                Text text=new Text(msg);
+                TextFlow textFlow=new TextFlow(text);
+
+                textFlow.setMaxWidth(400);
+
+                hBox.getChildren().add(textFlow);
+                vBox.getChildren().add(hBox);
+                txtArea.clear();
+
+                HBox hBox1=new HBox();
+                hBox1.setAlignment(Pos.CENTER_LEFT);
+
+                Text text1=new Text(dataInputStream.readUTF());
+                TextFlow textFlow1=new TextFlow(text1);
+
+                textFlow1.setMaxWidth(400);
+
+                hBox1.getChildren().add(textFlow1);
+                vBox.getChildren().add(hBox1);
+
 
 
             }

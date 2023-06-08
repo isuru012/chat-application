@@ -14,46 +14,46 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Client1Controller">
+<AnchorPane prefHeight="800.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Client2Controller">
    <children>
-      <JFXTextArea fx:id="txtArea" layoutX="14.0" layoutY="736.0" onKeyReleased="#onActionKeyReleasedTxtArea" prefHeight="44.0" prefWidth="760.0" visible="false">
+      <JFXTextArea fx:id="txtArea" layoutX="14.0" layoutY="736.0" onKeyReleased="#onActionKeyReleasedTxtArea" opacity="0.0" prefHeight="44.0" prefWidth="760.0">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </JFXTextArea>
-      <JFXButton fx:id="btnSendId" buttonType="RAISED" layoutX="933.0" layoutY="741.0" onAction="#btnSend" prefHeight="37.0" prefWidth="69.0" style="-fx-background-color: #BFF5DC;" text="Send" visible="false">
+      <JFXButton buttonType="RAISED" layoutX="933.0" layoutY="741.0" onAction="#btnSend" opacity="0.0" prefHeight="37.0" prefWidth="69.0" style="-fx-background-color: #BFF5DC;" text="Send">
          <font>
             <Font name="Arial Bold" size="14.0" />
          </font>
       </JFXButton>
-      <ImageView fx:id="imgSelect" fitHeight="37.0" fitWidth="47.0" layoutX="857.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" pickOnBounds="true" preserveRatio="true" visible="false">
+      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="857.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" opacity="0.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/attach.png" />
          </image>
       </ImageView>
-      <Label fx:id="lblClient" layoutX="14.0" layoutY="12.0" prefHeight="29.0" prefWidth="104.0" text="Client1" visible="false">
+      <Label layoutX="14.0" layoutY="12.0" opacity="0.0" prefHeight="29.0" prefWidth="104.0" text="Client1">
          <font>
             <Font name="Arial Bold" size="21.0" />
          </font>
       </Label>
-      <ScrollPane fx:id="scrollPane" layoutX="14.0" layoutY="52.0" prefHeight="672.0" prefWidth="996.0" visible="false">
+      <ScrollPane layoutX="14.0" layoutY="52.0" opacity="0.0" prefHeight="672.0" prefWidth="996.0">
          <content>
             <VBox prefHeight="670.0" prefWidth="990.0" />
          </content>
       </ScrollPane>
-      <ImageView fx:id="emojiSelect" fitHeight="37.0" fitWidth="47.0" layoutX="804.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" pickOnBounds="true" preserveRatio="true" visible="false">
+      <ImageView fitHeight="37.0" fitWidth="47.0" layoutX="804.0" layoutY="741.0" onMouseClicked="#onMouseClickedImageSelect" opacity="0.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/emojii.png" />
          </image>
       </ImageView>
-      <Pane fx:id="loginPane" prefHeight="800.0" prefWidth="1024.0">
+      <Pane prefHeight="800.0" prefWidth="1024.0">
          <children>
-            <ImageView fx:id="loginPic" fitHeight="182.0" fitWidth="216.0" layoutX="421.0" layoutY="160.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="182.0" fitWidth="216.0" layoutX="421.0" layoutY="160.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../assets/login.png" />
                </image>
             </ImageView>
-            <JFXTextField fx:id="txtLogin" layoutX="243.0" layoutY="400.0" prefHeight="57.0" prefWidth="566.0" promptText="Enter Your Username" style="-fx-background-color: #FFFFFF;">
+            <JFXTextField layoutX="243.0" layoutY="400.0" prefHeight="57.0" prefWidth="566.0" promptText="Enter Your Username" style="-fx-background-color: #FFFFFF;">
                <effect>
                   <DropShadow color="#00000044" />
                </effect>
@@ -61,7 +61,7 @@
                   <Font name="Arial Bold" size="20.0" />
                </font>
             </JFXTextField>
-            <ImageView fx:id="btnLogin" fitHeight="57.0" fitWidth="69.0" layoutX="830.0" layoutY="394.0" onMouseClicked="#onMouseClickLoginButton" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="57.0" fitWidth="69.0" layoutX="830.0" layoutY="394.0" onMouseClicked="#onMouseClickLoginButton" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../assets/arroww.png" />
                </image>
