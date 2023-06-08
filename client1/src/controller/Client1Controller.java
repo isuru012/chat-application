@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -53,6 +54,10 @@ public class Client1Controller extends Application{
 
     final int port = 3000;
 
+    DataInputStream dataInputStream;
+    DataOutputStream dataOutputStream;
+    Socket socket;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -70,10 +75,69 @@ public class Client1Controller extends Application{
 
     }
 
+    public void initialize() {
+        new Thread(() -> {
+            try {
+                socket = new Socket("localhost",port);
+                dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataInputStream = new DataInputStream(socket.getInputStream());
+
+
+
+                while (true){
+                    String s = dataInputStream.readUTF();
+                    getMessage(s);
+                }
+            }catch (Exception e){
+
+            }
+        }).start();
+
+    }
+
     @FXML
-    void btnSend(ActionEvent event) {
+    void btnSend(ActionEvent event) throws IOException {
+
+        String msg = txtArea.getText();
+
+        if (!msg.equals("")) {
+            dataOutputStream.writeUTF(msg);
+            dataOutputStream.flush();
 
 
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+
+            Text text = new Text(msg);
+            TextFlow textFlow = new TextFlow(text);
+
+            textFlow.setMaxWidth(400);
+            textFlow.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 8; -fx-border-radius: 10; -fx-background-radius: 10");
+        /*textFlow.setStyle("-fx-padding: 10");
+        textFlow.setStyle("-fx-border-radius: 100");*/
+
+
+            hBox.getChildren().add(textFlow);
+            vBox.getChildren().add(hBox);
+            txtArea.clear();
+        }
+    }
+
+    void getMessage(String msg){
+        Platform.runLater(() -> {
+            HBox hBox1=new HBox();
+            hBox1.setAlignment(Pos.CENTER_LEFT);
+
+            Text text1=new Text(msg);
+            TextFlow textFlow1=new TextFlow(text1);
+
+            textFlow1.setMaxWidth(400);
+            textFlow1.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 8; -fx-border-radius: 10; -fx-background-radius: 10");
+
+
+            hBox1.getChildren().add(textFlow1);
+            vBox.getChildren().add(hBox1);
+        });
     }
 
     @FXML
@@ -97,56 +161,17 @@ public class Client1Controller extends Application{
             scrollPane.setVisible(true);
             lblClient.setVisible(true);
 
-            lblClient.setText(txtLogin.getText());
-
-            Socket socket = new Socket("localhost",port);
-            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
 
             String name = txtLogin.getText();
+            lblClient.setText(name);
+
             dataOutputStream.writeUTF(name);
             dataOutputStream.flush();
 
-            while (true){
-                String msg = txtArea.getText();
 
-                if (msg.equalsIgnoreCase("CLOSE")){
-                    break;
-                }
-                dataOutputStream.writeUTF(msg);
-                dataOutputStream.flush();
-                HBox hBox=new HBox();
-                hBox.setAlignment(Pos.CENTER_RIGHT);
-
-                Text text=new Text(msg);
-                TextFlow textFlow=new TextFlow(text);
-
-                textFlow.setMaxWidth(400);
-
-                hBox.getChildren().add(textFlow);
-                vBox.getChildren().add(hBox);
-                txtArea.clear();
-
-                HBox hBox1=new HBox();
-                hBox1.setAlignment(Pos.CENTER_LEFT);
-
-                Text text1=new Text(dataInputStream.readUTF());
-                TextFlow textFlow1=new TextFlow(text1);
-
-                textFlow1.setMaxWidth(400);
-
-                hBox1.getChildren().add(textFlow1);
-                vBox.getChildren().add(hBox1);
-
-
-
-            }
-
-            dataOutputStream.close();
-            socket.close();
 
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }

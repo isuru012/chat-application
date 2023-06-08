@@ -33,7 +33,7 @@ public class HandleClients extends Thread{
 
                 ServerSide.sendMessageToAll(this.name,messageWithName);
 
-                socket.close();
+
             }
         }catch (Exception e){
             System.out.println(e.getMessage());

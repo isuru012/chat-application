@@ -19,7 +19,7 @@ public class ServerSide {
         final int port=3000;
         try{
             ServerSocket serverSocket=new ServerSocket(port);
-            for (int i = 0; i < 4; i++) {
+            while(true){
                 Socket socket=serverSocket.accept();
 
                 DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
@@ -37,6 +37,7 @@ public class ServerSide {
 
 
     public static void sendMessageToAll(String name, String messageWithName) {
+        System.out.println(messageWithName);
         for (HandleClients handleClients:clients) {
             if (!handleClients.name.equals(name)){
                 handleClients.sendMessage(messageWithName);
