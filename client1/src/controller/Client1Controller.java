@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,14 +24,17 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
 
 import static javafx.application.Application.launch;
 
@@ -83,10 +87,15 @@ public class Client1Controller extends Application{
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
 
-
-                while (true){
+                while (true) {
                     String s = dataInputStream.readUTF();
-                    getMessage(s);
+
+                    // Check if the received message is an image
+                    if (s.equals("IMAGE")) {
+                        receiveImage();
+                    } else {
+                        getMessage(s);
+                    }
                 }
             }catch (Exception e){
 
@@ -101,6 +110,7 @@ public class Client1Controller extends Application{
         String msg = txtArea.getText();
 
         if (!msg.equals("")) {
+            dataOutputStream.writeInt(0);
             dataOutputStream.writeUTF(msg);
             dataOutputStream.flush();
 
@@ -144,12 +154,126 @@ public class Client1Controller extends Application{
     void onActionKeyReleasedTxtArea(KeyEvent event) {
 
     }
+    ImageView imageView = new ImageView();
 
     @FXML
     void onMouseClickedImageSelect(MouseEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Image");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+        File selectedFile = fileChooser.showOpenDialog(null);
 
+        if (selectedFile != null) {
+            // Load and resize the selected image
+            Image image = new Image(selectedFile.toURI().toString());
+            double scaleFactor = 0.5; // Desired scale factor for resizing (e.g., 0.5 for 50% smaller)
+            imageView.setImage(resizeImage(image, scaleFactor));
+
+            // Now you can send the resized image to the chat
+            sendImageToChat(selectedFile);
+        }
     }
 
+    private Image resizeImage(Image image, double scaleFactor) {
+        double newWidth = image.getWidth() * scaleFactor;
+        double newHeight = image.getHeight() * scaleFactor;
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+        imageView.setFitWidth(newWidth);
+        imageView.setFitHeight(newHeight);
+        return imageView.snapshot(null, null);
+    }
+
+    /*private void sendImageToChat(File selectedFile) {
+        try {
+            BufferedImage image = ImageIO.read(selectedFile);
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "jpg", byteArrayOutputStream);
+
+            byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+            dataOutputStream.writeInt(1); // Message type: Image
+            dataOutputStream.write(size);
+            dataOutputStream.write(byteArrayOutputStream.toByteArray());
+            dataOutputStream.flush();
+
+            ImageView imageView = new ImageView(new Image(selectedFile.toURI().toString()));
+
+            HBox hBox = new HBox(imageView);
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+            vBox.getChildren().add(hBox);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
+    private void sendImageToChat(File selectedFile) {
+        try {
+            // Load the original image
+            Image originalImage = new Image(selectedFile.toURI().toString());
+
+            // Calculate the desired width and height for the resized image
+            double maxWidth = 200; // Change this to your desired maximum width
+            double maxHeight = 200; // Change this to your desired maximum height
+
+            // Calculate the scaling factor
+            double scaleFactor = Math.min(maxWidth / originalImage.getWidth(), maxHeight / originalImage.getHeight());
+
+            // Create a new ImageView to display the resized image
+            ImageView imageView = new ImageView();
+            imageView.setImage(originalImage);
+            imageView.setPreserveRatio(true);
+            imageView.setFitWidth(originalImage.getWidth() * scaleFactor);
+            imageView.setFitHeight(originalImage.getHeight() * scaleFactor);
+
+            // Convert the resized image to a BufferedImage
+            BufferedImage resizedImage = SwingFXUtils.fromFXImage(imageView.snapshot(null, null), null);
+
+            // Write the resized image to a ByteArrayOutputStream
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(resizedImage, "jpg", byteArrayOutputStream);
+
+            // Send the resized image data to the server
+            byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+            dataOutputStream.writeInt(1); // Message type: Image
+            dataOutputStream.write(size);
+            dataOutputStream.write(byteArrayOutputStream.toByteArray());
+            dataOutputStream.flush();
+
+            // Display the resized image in the chat UI
+            HBox hBox = new HBox(imageView);
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+            vBox.getChildren().add(hBox);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void receiveImage() {
+        try {
+            byte[] sizeAr = new byte[4];
+            dataInputStream.read(sizeAr);
+            int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+            byte[] imageAr = new byte[size];
+            dataInputStream.readFully(imageAr);
+
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageAr);
+            BufferedImage image = ImageIO.read(byteArrayInputStream);
+
+            ImageView receivedImageView = new ImageView();
+            receivedImageView.setImage(SwingFXUtils.toFXImage(image, null));
+
+            Platform.runLater(() -> {
+                HBox hBox = new HBox(receivedImageView);
+                vBox.getChildren().add(hBox);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public void onMouseClickLoginButton(MouseEvent mouseEvent) {
         try{
 

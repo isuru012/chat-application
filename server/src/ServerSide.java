@@ -7,6 +7,7 @@
 
 
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -41,6 +42,15 @@ public class ServerSide {
         for (HandleClients handleClients:clients) {
             if (!handleClients.name.equals(name)){
                 handleClients.sendMessage(messageWithName);
+            }
+        }
+    }
+
+    public static void broadcastImage(byte[] imageData,String name) {
+
+        for (HandleClients client : clients) {
+            if (!client.name.equals(name)) {
+                client.sendImage(imageData);
             }
         }
     }
