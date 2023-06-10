@@ -45,18 +45,22 @@ public class HandleClients extends Thread {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
 
+
             while (true) {
-                int messageType = dataInputStream.readInt();
-                System.out.println("messagetype"+messageType);
-                if (messageType == 0) {
+                /*int messageType = dataInputStream.readInt();
+                System.out.println("messagetype"+messageType);*/
+
+                String dataType = dataInputStream.readUTF();
+
+                if (dataType.equals("TEXT")) {
                     // Text message
                     String message = dataInputStream.readUTF();
                     String messageWithName = this.name + " :- " + message;
                     ServerSide.sendMessageToAll(this.name, messageWithName);
 
-                } else if (messageType == 1) {
+                } else if (dataType.equals("IMAGE")) {
                     // Image message
-                    byte[] sizeAr = new byte[4];
+                    /*byte[] sizeAr = new byte[4];
                     dataInputStream.read(sizeAr);
                     int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
 
@@ -64,13 +68,16 @@ public class HandleClients extends Thread {
                     dataInputStream.read(imageAr);
 
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageAr);
-                    BufferedImage image = ImageIO.read(byteArrayInputStream);
+                    BufferedImage image = ImageIO.read(byteArrayInputStream);*/
 
                     // Handle the image data as needed
                     // For example, you can save the image to a file or process it in some way
 
                     // You can also broadcast the image to all clients
-                    ServerSide.broadcastImage(imageAr, this.name);
+
+                    String imagePath = dataInputStream.readUTF();
+
+                    ServerSide.broadcastImage(imagePath, this.name);
                 }
             }
 
@@ -84,7 +91,11 @@ public class HandleClients extends Thread {
 
     public void sendMessage(String reply) {
         try {
-            dataOutputStream.writeInt(0); // Message type: Text
+            //Setting data type to text
+            dataOutputStream.writeUTF("TEXT");
+            dataOutputStream.flush();
+
+
             dataOutputStream.writeUTF(reply);
             dataOutputStream.flush();
         } catch (Exception e) {
@@ -92,11 +103,20 @@ public class HandleClients extends Thread {
         }
     }
 
-    public void sendImage(byte[] imageData) {
+    public void sendImage(String imagePath,String name) {
+        System.out.println(imagePath);
         try {
-            dataOutputStream.writeInt(1); // Message type: Image
-            dataOutputStream.writeInt(imageData.length);
-            dataOutputStream.write(imageData);
+
+            //Setting data type to image
+
+            dataOutputStream.writeUTF("IMAGE");
+            dataOutputStream.flush();
+
+            dataOutputStream.writeUTF(name);
+            dataOutputStream.flush();
+
+            //dataOutputStream.writeInt(imageData.length);
+            dataOutputStream.writeUTF(imagePath);
             dataOutputStream.flush();
         } catch (Exception e) {
             System.out.println(e.getMessage());

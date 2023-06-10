@@ -46,11 +46,10 @@ public class ServerSide {
         }
     }
 
-    public static void broadcastImage(byte[] imageData,String name) {
-
+    public static void broadcastImage(String imagePath,String name) {
         for (HandleClients client : clients) {
             if (!client.name.equals(name)) {
-                client.sendImage(imageData);
+                client.sendImage(imagePath,name);
             }
         }
     }

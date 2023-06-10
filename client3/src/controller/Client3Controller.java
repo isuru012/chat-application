@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,14 +24,17 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
 
 import static javafx.application.Application.launch;
 
@@ -82,11 +86,18 @@ public class Client3Controller extends Application{
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
-
-
-                while (true){
+                while (true) {
                     String s = dataInputStream.readUTF();
-                    getMessage(s);
+
+                    // Check if the received message is an image
+                    if (s.equals("IMAGE")) {
+                        String msg= dataInputStream.readUTF();
+                        receiveImage(msg);
+                    } else {
+                        String msg= dataInputStream.readUTF();
+                        System.out.println(msg);
+                        getMessage(msg);
+                    }
                 }
             }catch (Exception e){
 
@@ -101,6 +112,9 @@ public class Client3Controller extends Application{
         String msg = txtArea.getText();
 
         if (!msg.equals("")) {
+            dataOutputStream.writeUTF("TEXT");
+            dataOutputStream.flush();
+
             dataOutputStream.writeUTF(msg);
             dataOutputStream.flush();
 
@@ -113,8 +127,6 @@ public class Client3Controller extends Application{
 
             textFlow.setMaxWidth(400);
             textFlow.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 8; -fx-border-radius: 10; -fx-background-radius: 10");
-        /*textFlow.setStyle("-fx-padding: 10");
-        textFlow.setStyle("-fx-border-radius: 100");*/
 
 
             hBox.getChildren().add(textFlow);
@@ -146,10 +158,107 @@ public class Client3Controller extends Application{
     }
 
     @FXML
-    void onMouseClickedImageSelect(MouseEvent event) {
+    void onMouseClickedImageSelect(MouseEvent event) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Image");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+        File selectedFile = fileChooser.showOpenDialog(null);
 
+        if (selectedFile != null) {
+
+            dataOutputStream.writeUTF("IMAGE");
+            dataOutputStream.flush();
+
+            dataOutputStream.writeUTF(selectedFile.toURI().toString());
+            dataOutputStream.flush();
+
+            // Now you can send the resized image to the chat
+            sendImageToChat(selectedFile);
+        }
     }
 
+
+    /*private void sendImageToChat(File selectedFile) {
+        try {
+            BufferedImage image = ImageIO.read(selectedFile);
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "jpg", byteArrayOutputStream);
+
+            byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+            dataOutputStream.writeInt(1); // Message type: Image
+            dataOutputStream.write(size);
+            dataOutputStream.write(byteArrayOutputStream.toByteArray());
+            dataOutputStream.flush();
+
+            ImageView imageView = new ImageView(new Image(selectedFile.toURI().toString()));
+
+            HBox hBox = new HBox(imageView);
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+            vBox.getChildren().add(hBox);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
+    private void sendImageToChat(File selectedFile) {
+        try {
+            // Load the original image
+            Image originalImage = new Image(selectedFile.toURI().toString());
+
+            // Calculate the desired width and height for the resized image
+            ImageView originalImageView = new ImageView();
+
+            originalImageView.prefHeight(150);
+            originalImageView.prefWidth(150);
+
+            originalImageView.setImage(originalImage);
+
+            // Display the resized image in the chat UI
+            HBox hBox = new HBox(originalImageView);
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+            vBox.getChildren().add(hBox);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void receiveImage(String msg) {
+        try {
+            /*byte[] sizeAr = new byte[4];
+            dataInputStream.read(sizeAr);
+            int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+            byte[] imageAr = new byte[size];
+            dataInputStream.readFully(imageAr);
+
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageAr);
+            BufferedImage image = ImageIO.read(byteArrayInputStream);*/
+
+
+            String imagePath = dataInputStream.readUTF();
+
+            ImageView receivedImageView = new ImageView();
+
+            Text text1=new Text(msg);
+            TextFlow textFlow1=new TextFlow(text1);
+
+            receivedImageView.prefHeight(150);
+            receivedImageView.prefWidth(150);
+
+            receivedImageView.setImage(new Image(imagePath));
+
+            Platform.runLater(() -> {
+                HBox hBox = new HBox(receivedImageView);
+                hBox.getChildren().add(textFlow1);
+                vBox.getChildren().add(hBox);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public void onMouseClickLoginButton(MouseEvent mouseEvent) {
         try{
 
@@ -160,8 +269,6 @@ public class Client3Controller extends Application{
             emojiSelect.setVisible(true);
             scrollPane.setVisible(true);
             lblClient.setVisible(true);
-
-
             String name = txtLogin.getText();
             lblClient.setText(name);
 

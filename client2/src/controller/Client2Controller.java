@@ -86,15 +86,17 @@ public class Client2Controller extends Application{
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
-
                 while (true) {
                     String s = dataInputStream.readUTF();
 
                     // Check if the received message is an image
                     if (s.equals("IMAGE")) {
-                        receiveImage();
+                        String msg= dataInputStream.readUTF();
+                        receiveImage(msg);
                     } else {
-                        getMessage(s);
+                        String msg= dataInputStream.readUTF();
+                        System.out.println(msg);
+                        getMessage(msg);
                     }
                 }
             }catch (Exception e){
@@ -110,7 +112,9 @@ public class Client2Controller extends Application{
         String msg = txtArea.getText();
 
         if (!msg.equals("")) {
-            dataOutputStream.writeInt(0);
+            dataOutputStream.writeUTF("TEXT");
+            dataOutputStream.flush();
+
             dataOutputStream.writeUTF(msg);
             dataOutputStream.flush();
 
@@ -123,8 +127,6 @@ public class Client2Controller extends Application{
 
             textFlow.setMaxWidth(400);
             textFlow.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 8; -fx-border-radius: 10; -fx-background-radius: 10");
-        /*textFlow.setStyle("-fx-padding: 10");
-        textFlow.setStyle("-fx-border-radius: 100");*/
 
 
             hBox.getChildren().add(textFlow);
@@ -154,10 +156,9 @@ public class Client2Controller extends Application{
     void onActionKeyReleasedTxtArea(KeyEvent event) {
 
     }
-    ImageView imageView = new ImageView();
 
     @FXML
-    void onMouseClickedImageSelect(MouseEvent event) {
+    void onMouseClickedImageSelect(MouseEvent event) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Image");
         fileChooser.getExtensionFilters().add(
@@ -165,25 +166,18 @@ public class Client2Controller extends Application{
         File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
-            // Load and resize the selected image
-            Image image = new Image(selectedFile.toURI().toString());
-            double scaleFactor = 0.5; // Desired scale factor for resizing (e.g., 0.5 for 50% smaller)
-            imageView.setImage(resizeImage(image, scaleFactor));
+
+            dataOutputStream.writeUTF("IMAGE");
+            dataOutputStream.flush();
+
+            dataOutputStream.writeUTF(selectedFile.toURI().toString());
+            dataOutputStream.flush();
 
             // Now you can send the resized image to the chat
             sendImageToChat(selectedFile);
         }
     }
 
-    private Image resizeImage(Image image, double scaleFactor) {
-        double newWidth = image.getWidth() * scaleFactor;
-        double newHeight = image.getHeight() * scaleFactor;
-        ImageView imageView = new ImageView(image);
-        imageView.setPreserveRatio(true);
-        imageView.setFitWidth(newWidth);
-        imageView.setFitHeight(newHeight);
-        return imageView.snapshot(null, null);
-    }
 
     /*private void sendImageToChat(File selectedFile) {
         try {
@@ -214,46 +208,26 @@ public class Client2Controller extends Application{
             Image originalImage = new Image(selectedFile.toURI().toString());
 
             // Calculate the desired width and height for the resized image
-            double maxWidth = 200; // Change this to your desired maximum width
-            double maxHeight = 200; // Change this to your desired maximum height
+            ImageView originalImageView = new ImageView();
 
-            // Calculate the scaling factor
-            double scaleFactor = Math.min(maxWidth / originalImage.getWidth(), maxHeight / originalImage.getHeight());
+            originalImageView.prefHeight(150);
+            originalImageView.prefWidth(150);
 
-            // Create a new ImageView to display the resized image
-            ImageView imageView = new ImageView();
-            imageView.setImage(originalImage);
-            imageView.setPreserveRatio(true);
-            imageView.setFitWidth(originalImage.getWidth() * scaleFactor);
-            imageView.setFitHeight(originalImage.getHeight() * scaleFactor);
-
-            // Convert the resized image to a BufferedImage
-            BufferedImage resizedImage = SwingFXUtils.fromFXImage(imageView.snapshot(null, null), null);
-
-            // Write the resized image to a ByteArrayOutputStream
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ImageIO.write(resizedImage, "jpg", byteArrayOutputStream);
-
-            // Send the resized image data to the server
-            byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-            dataOutputStream.writeInt(1); // Message type: Image
-            dataOutputStream.write(size);
-            dataOutputStream.write(byteArrayOutputStream.toByteArray());
-            dataOutputStream.flush();
+            originalImageView.setImage(originalImage);
 
             // Display the resized image in the chat UI
-            HBox hBox = new HBox(imageView);
+            HBox hBox = new HBox(originalImageView);
             hBox.setAlignment(Pos.CENTER_RIGHT);
             vBox.getChildren().add(hBox);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-    private void receiveImage() {
+    private void receiveImage(String msg) {
         try {
-            byte[] sizeAr = new byte[4];
+            /*byte[] sizeAr = new byte[4];
             dataInputStream.read(sizeAr);
             int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
 
@@ -261,13 +235,24 @@ public class Client2Controller extends Application{
             dataInputStream.readFully(imageAr);
 
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageAr);
-            BufferedImage image = ImageIO.read(byteArrayInputStream);
+            BufferedImage image = ImageIO.read(byteArrayInputStream);*/
+
+
+            String imagePath = dataInputStream.readUTF();
 
             ImageView receivedImageView = new ImageView();
-            receivedImageView.setImage(SwingFXUtils.toFXImage(image, null));
+
+            Text text1=new Text(msg);
+            TextFlow textFlow1=new TextFlow(text1);
+
+            receivedImageView.prefHeight(150);
+            receivedImageView.prefWidth(150);
+
+            receivedImageView.setImage(new Image(imagePath));
 
             Platform.runLater(() -> {
                 HBox hBox = new HBox(receivedImageView);
+                hBox.getChildren().add(textFlow1);
                 vBox.getChildren().add(hBox);
             });
         } catch (IOException e) {
@@ -284,8 +269,6 @@ public class Client2Controller extends Application{
             emojiSelect.setVisible(true);
             scrollPane.setVisible(true);
             lblClient.setVisible(true);
-
-
             String name = txtLogin.getText();
             lblClient.setText(name);
 
